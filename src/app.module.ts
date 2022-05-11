@@ -7,10 +7,12 @@ import { UsersModule } from './users/users.module';
 import { PostingsModule } from './postings/postings.module';
 import { BoardsModule } from './boards/boards.module';
 import { MatchingsModule } from './matchings/matchings.module';
+import { validationSchema } from './config/validationSchema';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      validationSchema: validationSchema,
       envFilePath: [`${__dirname}/../env/.${process.env.NODE_ENV}.env`],
       isGlobal: true,
     }),
@@ -24,7 +26,7 @@ import { MatchingsModule } from './matchings/matchings.module';
         username: config.get('DATABASE_USERNAME'),
         password: config.get('DATABASE_PASSWORD'),
         database: config.get('DATABASE_DATABASE'),
-        entities: [__dirname + "dist/**/*.entity{.ts,.js}"],
+        entities: ["dist/**/*.entity{.ts,.js}"],
         // synchronize: Boolean(config.get('DATABASE_SYNCHRONIZE')),
         synchronize: true,
         logging: true,

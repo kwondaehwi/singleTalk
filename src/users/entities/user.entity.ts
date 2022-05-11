@@ -2,7 +2,7 @@ import { IsEmail, IsString } from "class-validator";
 import { Posting } from "src/postings/entities/posting.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity()
+@Entity("user")
 export class User {
     @PrimaryGeneratedColumn()
     userIdx: number;
@@ -15,17 +15,17 @@ export class User {
     @Column()
     @IsString()
     nickname: string;
-    @Column()
-    @IsString()
-    region: string;
-    @Column()
-    @IsEmail()
-    email: string;
-    @Column({
-        nullable: true,
-    })
-    @IsString()
-    description: string
+    // @Column()
+    // @IsString()
+    // region: string;
+    // @Column()
+    // @IsEmail()
+    // email: string;
+    // @Column({
+    //     nullable: true,
+    // })
+    // @IsString()
+    // description: string
 
     @OneToMany(()=>Posting, posting=>posting.user)
     postings: Posting[];
