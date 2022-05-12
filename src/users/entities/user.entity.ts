@@ -1,3 +1,4 @@
+import { Exclude } from "class-transformer";
 import { IsEmail, IsString } from "class-validator";
 import { Posting } from "src/postings/entities/posting.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -15,6 +16,10 @@ export class User {
     @Column()
     @IsString()
     nickname: string;
+    @Column()
+    @Column({ nullable: true })
+    @Exclude()
+    currentToken?: string;
     // @Column()
     // @IsString()
     // region: string;

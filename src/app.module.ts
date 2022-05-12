@@ -8,6 +8,7 @@ import { PostingsModule } from './postings/postings.module';
 import { BoardsModule } from './boards/boards.module';
 import { MatchingsModule } from './matchings/matchings.module';
 import { validationSchema } from './config/validationSchema';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { validationSchema } from './config/validationSchema';
     PostingsModule,
     BoardsModule,
     MatchingsModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
