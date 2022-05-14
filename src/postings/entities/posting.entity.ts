@@ -1,7 +1,8 @@
 import { IsBoolean, IsNumber, IsString } from "class-validator";
 import { Board } from "src/boards/entities/board.entity";
+import { Useful } from "src/usefuls/entities/useful.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Posting {
@@ -37,4 +38,6 @@ export class Posting {
         referencedColumnName: 'boardIdx',
     })
     board: Board;
+    @OneToMany(()=>Useful, useful=>useful.posting)
+    usefuls: Useful[];
 }
