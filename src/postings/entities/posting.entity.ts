@@ -1,5 +1,7 @@
 import { IsBoolean, IsNumber, IsString } from "class-validator";
 import { Board } from "src/boards/entities/board.entity";
+import { Comment } from "src/comments/entities/comment.entity";
+import { Joyful } from "src/joyfuls/entities/joyful.entity";
 import { Useful } from "src/usefuls/entities/useful.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -40,4 +42,8 @@ export class Posting {
     board: Board;
     @OneToMany(()=>Useful, useful=>useful.posting)
     usefuls: Useful[];
+    @OneToMany(()=>Joyful, joyful=>joyful.posting)
+    joyfuls: Useful[];
+    @OneToMany(()=>Comment, comment=>comment.posting)
+    comments: Comment[];
 }

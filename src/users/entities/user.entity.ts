@@ -1,5 +1,7 @@
 import { Exclude } from "class-transformer";
 import { IsEmail, IsString } from "class-validator";
+import { Comment } from "src/comments/entities/comment.entity";
+import { Joyful } from "src/joyfuls/entities/joyful.entity";
 import { Posting } from "src/postings/entities/posting.entity";
 import { Useful } from "src/usefuls/entities/useful.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -35,8 +37,12 @@ export class User {
 
     @OneToMany(()=>Posting, posting=>posting.user)
     postings: Posting[];
-
     @OneToMany(()=>Useful, useful=>useful.user)
     usefuls: Useful[];
+    @OneToMany(()=>Joyful, joyful=>joyful.user)
+    joyfuls: Joyful[];
+    @OneToMany(()=>Comment, comment=>comment.user)
+    comments: Comment[];
+
 
 }
