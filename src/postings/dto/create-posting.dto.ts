@@ -2,21 +2,16 @@ import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreatePostingDto {
 
-  @IsNumber()
-  boardIdx: number;
-
-  @IsNumber()
-  userIdx: number;
-
   @IsString()
-  title: string;
-
-  @IsString()
-  content: string;
-
+  boardType: string;
   @IsString()
   category: string;
-
+  @IsNumber()
+  userIdx: number;
+  @IsString()
+  title: string;
+  @IsString()
+  content: string;
   @IsBoolean()
   isAnonymous: boolean;
 }

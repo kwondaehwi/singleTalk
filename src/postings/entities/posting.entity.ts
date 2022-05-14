@@ -27,11 +27,13 @@ export class Posting {
 
     @ManyToOne(()=>User, user=>user.postings)
     @JoinColumn({
+        name: 'userIdx',
         referencedColumnName: 'userIdx',
     })
     user: User;
     @ManyToOne(()=>Board, board=>board.postings)
     @JoinColumn({
+        name: 'boardIdx',
         referencedColumnName: 'boardIdx',
     })
     board: Board;
