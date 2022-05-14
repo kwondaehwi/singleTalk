@@ -21,21 +21,24 @@ export class PostingsService {
             if (category == "all"){
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
                 .addSelect(['user.nickname'])
                 .leftJoin('posting.user', 'user')
                 .leftJoin('posting.board', 'board')
                 .where('board.type = :type', {type})
+                .groupBy('posting.postingIdx')
                 .getMany()
 
                 return new PostingResDto(postings);
             } else{
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
                 .addSelect(['user.nickname'])
+                .addSelect(['COUNT(usefuls.postingIdx) as usefulCount'])
                 .leftJoin('posting.user', 'user')
                 .leftJoin('posting.board', 'board')
+                .leftJoin('posting.usefuls', 'usefuls')
                 .where('board.type = :type and board.category = :category', {type, category})
                 .getMany()
 
@@ -43,6 +46,27 @@ export class PostingsService {
             }
         } catch(e) {
             console.log(e);
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    async getMyPostings(userIdx: number, type: string){
+        const queryRunner = this.connection.createQueryRunner();
+        try {
+            const postings = await queryRunner.manager
+                .createQueryBuilder(Posting, 'posting')
+                .select(['posting.postingIdx', 'posting.title', 'posting.content','posting.createdAt', 'posting.updatedAt'])
+                .addSelect(['user.nickname', 'user.userID'])
+                .leftJoin('posting.user', 'user')
+                .leftJoin('posting.board', 'board')
+                .where('posting.userIdx = :userIdx and board.type = :type', {userIdx, type})
+                .getMany();
+
+            console.log(postings)
+            return new PostingResDto(postings);
+        } catch(e) {
+            console.log(e)
         } finally {
             await queryRunner.release();
         }

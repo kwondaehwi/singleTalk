@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
 import { CreatePostingDto } from './dto/create-posting.dto';
 import { PostingsService } from './postings.service';
 
@@ -15,6 +15,14 @@ export class PostingsController {
         @Query('type') type: string, 
         @Res() res) {
         res.send(await this.postingsService.getPostings(category, sort, type));
+    }
+
+    @Get('mypage/:userIdx')
+    async getMyPostings(
+        @Param('userIdx') userIdx: number, 
+        @Query('type') type: string,
+        @Res() res){
+        res.send(await this.postingsService.getMyPostings(userIdx, type));
     }
 
     @Post()
