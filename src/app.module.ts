@@ -12,6 +12,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsefulsModule } from './usefuls/usefuls.module';
 import { JoyfulsModule } from './joyfuls/joyfuls.module';
 import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { CommentsModule } from './comments/comments.module';
     UsefulsModule,
     JoyfulsModule,
     CommentsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

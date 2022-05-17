@@ -2,8 +2,7 @@ import { IsBoolean, IsNumber, IsString } from "class-validator";
 import { Board } from "src/boards/entities/board.entity";
 import { Comment } from "src/comments/entities/comment.entity";
 import { Common } from "src/commons/entity/common.entity";
-import { Joyful } from "src/joyfuls/entities/joyful.entity";
-import { Useful } from "src/usefuls/entities/useful.entity";
+import { Like } from "src/likes/entities/likes.entitiy";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -41,15 +40,11 @@ export class Posting extends Common {
         referencedColumnName: 'boardIdx',
     })
     board: Board;
-    @OneToMany(()=>Useful, useful=>useful.posting, {
+    @OneToMany(()=>Like, like=>like.posting, {
         cascade: true,
     })
-    usefuls: Useful[];
-    @OneToMany(()=>Joyful, joyful=>joyful.posting, {
-        cascade: true,
-    })
-    joyfuls: Useful[];
-    @OneToMany(()=>Comment, comment=>comment.posting, {
+    likes: Like[];
+    @OneToMany(()=>Like, like=>like.posting, {
         cascade: true,
     })
     comments: Comment[];

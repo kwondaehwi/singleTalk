@@ -30,14 +30,14 @@ export class PostingsController {
         res.send(await this.postingsService.getMyPostings(userIdx, type));
     }
 
-    @Get('/:postingIdx')
+    @Get(':postingIdx')
     async getPosting(
         @Req() req: Request,
         @Param('postingIdx') postingIdx: number,
         @Res() res
     ){
         const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
-        res.send(await this.postingsService.getPosting(postingIdx, userIdx));
+        res.send(await this.postingsService.getPosting(userIdx, postingIdx));
     }
 
     @Post()
@@ -45,16 +45,10 @@ export class PostingsController {
         res.send(await this.postingsService.create(createPostingDto));
     }
 
-    @Post(':postingIdx/useful')
-    async useful(@Req() req: Request, @Param('postingIdx') postingIdx: number, @Res() res){
+    @Post(':postingIdx')
+    async like(@Req() req: Request, @Param('postingIdx') postingIdx: number, @Query('type') type: string, @Res() res){
         const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
-        res.send(await this.postingsService.useful(userIdx, postingIdx));
-    }
-
-    @Post(':postingIdx/joyful')
-    async joyful(@Req() req: Request, @Param('postingIdx') postingIdx: number, @Res() res){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
-        res.send(await this.postingsService.joyful(userIdx, postingIdx));
+        res.send(await this.postingsService.like(userIdx, postingIdx, type));
     }
 
     @Put(':postingIdx')

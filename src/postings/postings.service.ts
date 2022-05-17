@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { pseudoRandomBytes } from 'crypto';
 import { Board } from 'src/boards/entities/board.entity';
 import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
-import { Joyful } from 'src/joyfuls/entities/joyful.entity';
-import { Useful } from 'src/usefuls/entities/useful.entity';
+import { Like } from 'src/likes/entities/likes.entitiy';
 import { User } from 'src/users/entities/user.entity';
 import { Connection } from 'typeorm';
 import { CreatePostingDto } from './dto/create-posting.dto';
@@ -186,65 +184,27 @@ export class PostingsService {
         }
     }
 
-    async useful(userIdx: number, postingIdx: number){
-        const queryRunner = this.connection.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const useful = await queryRunner.manager.findOne(Useful, {
-                where: {
-                    userIdx,
-                    postingIdx,
-                }
-            });
-            if (useful){
-                await queryRunner.manager.delete(Useful, useful);
-                await queryRunner.commitTransaction();
-                return new BaseSuccessResDto();
-            } else {
-                const useful = new Useful();
-                const posting = await queryRunner.manager.findOne(Posting, {
-                    where: {
-                        postingIdx,
-                    }
-                });
-                const user = await queryRunner.manager.findOne(User, {
-                    where:{
-                        userIdx,
-                    }
-                });
-                useful.user = user;
-                useful.posting = posting;
-                await queryRunner.manager.save(useful);
-                await queryRunner.commitTransaction();
-                return new BaseSuccessResDto();
-            }
-        } catch(e) {
-            console.log(e);
-            await queryRunner.rollbackTransaction();
-            return new BaseFailResDto('false');
-        } finally {
-            await queryRunner.release();
+    async like(userIdx: number, postingIdx: number, type: string){
+        if(type !== "joyful" && type !== "useful" && type !== "scrap"){
+            return new BaseFailResDto('타입이 올바르지 않습니다. (joyful or useful or scrap)');
         }
-    }
-
-    async joyful(userIdx: number, postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const joyful = await queryRunner.manager.findOne(Joyful, {
+            const like = await queryRunner.manager.findOne(Like, {
                 where: {
                     userIdx,
                     postingIdx,
+                    type
                 }
             });
-            if (joyful){
-                await queryRunner.manager.delete(Joyful, joyful);
+            if (like){
+                await queryRunner.manager.delete(Like, like);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             } else {
-                const joyful = new Joyful();
+                const like = new Like();
                 const posting = await queryRunner.manager.findOne(Posting, {
                     where: {
                         postingIdx,
@@ -255,9 +215,10 @@ export class PostingsService {
                         userIdx,
                     }
                 });
-                joyful.user = user;
-                joyful.posting = posting;
-                await queryRunner.manager.save(joyful);
+                like.user = user;
+                like.posting = posting;
+                like.type = type;
+                await queryRunner.manager.save(like);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             }

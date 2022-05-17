@@ -1,26 +1,29 @@
-import { IsBoolean, IsNumber, IsString } from "class-validator";
+import { IsNumber } from "class-validator";
 import { Posting } from "src/postings/entities/posting.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Useful {
+export class Like {
     @PrimaryGeneratedColumn()
-    usefulIdx: number;
+    likeIdx: number;
     @Column()
     @IsNumber()
     userIdx: number;
     @Column()
     @IsNumber()
     postingIdx: number;
+    @Column()
+    @IsNumber()
+    type: string;
 
-    @ManyToOne(()=>User, user=>user.usefuls)
+    @ManyToOne(()=>User, user=>user.likes)
     @JoinColumn({
         name: 'userIdx',
         referencedColumnName: 'userIdx',
     })
     user: User;
-    @ManyToOne(()=>Posting, posting=>posting.usefuls)
+    @ManyToOne(()=>Posting, posting=>posting.likes)
     @JoinColumn({
         name: 'postingIdx',
         referencedColumnName: 'postingIdx',
