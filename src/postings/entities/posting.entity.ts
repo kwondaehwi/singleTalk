@@ -41,10 +41,16 @@ export class Posting extends Common {
         referencedColumnName: 'boardIdx',
     })
     board: Board;
-    @OneToMany(()=>Useful, useful=>useful.posting)
+    @OneToMany(()=>Useful, useful=>useful.posting, {
+        cascade: true,
+    })
     usefuls: Useful[];
-    @OneToMany(()=>Joyful, joyful=>joyful.posting)
+    @OneToMany(()=>Joyful, joyful=>joyful.posting, {
+        cascade: true,
+    })
     joyfuls: Useful[];
-    @OneToMany(()=>Comment, comment=>comment.posting)
+    @OneToMany(()=>Comment, comment=>comment.posting, {
+        cascade: true,
+    })
     comments: Comment[];
 }
