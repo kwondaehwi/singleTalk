@@ -27,13 +27,17 @@ export class Comment extends Common {
         referencedColumnName: 'userIdx',
     })
     user: User;
-    @ManyToOne(()=>Posting, posting=>posting.comments)
+    @ManyToOne(()=>Posting, posting=>posting.comments, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({
         name: 'postingIdx',
         referencedColumnName: 'postingIdx',
     })
     posting: Posting;
-    @OneToMany(()=>Reply, reply=>reply.comment)
+    @OneToMany(()=>Reply, reply=>reply.comment, {
+        cascade: true,
+    })
     replies: Reply[];
 }
 
@@ -60,7 +64,9 @@ export class Reply extends Common {
         referencedColumnName: 'userIdx',
     })
     user: User;
-    @ManyToOne(()=>Comment, comment=>comment.replies)
+    @ManyToOne(()=>Comment, comment=>comment.replies, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({
         name: 'commentIdx',
         referencedColumnName: 'commentIdx',

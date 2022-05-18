@@ -9,8 +9,6 @@ import { BoardsModule } from './boards/boards.module';
 import { MatchingsModule } from './matchings/matchings.module';
 import { validationSchema } from './config/validationSchema';
 import { AuthModule } from './auth/auth.module';
-import { UsefulsModule } from './usefuls/usefuls.module';
-import { JoyfulsModule } from './joyfuls/joyfuls.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
 
@@ -33,7 +31,7 @@ import { LikesModule } from './likes/likes.module';
         database: config.get('DATABASE_DATABASE'),
         entities: ["dist/**/*.entity{.ts,.js}"],
         // synchronize: Boolean(config.get('DATABASE_SYNCHRONIZE')),
-        synchronize: true,
+        synchronize: false,
         logging: true,
       }),
     }),
@@ -42,8 +40,6 @@ import { LikesModule } from './likes/likes.module';
     BoardsModule,
     MatchingsModule,
     AuthModule,
-    UsefulsModule,
-    JoyfulsModule,
     CommentsModule,
     LikesModule,
   ],

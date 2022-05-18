@@ -23,7 +23,9 @@ export class Like {
         referencedColumnName: 'userIdx',
     })
     user: User;
-    @ManyToOne(()=>Posting, posting=>posting.likes)
+    @ManyToOne(()=>Posting, posting=>posting.likes, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({
         name: 'postingIdx',
         referencedColumnName: 'postingIdx',

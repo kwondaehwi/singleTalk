@@ -3,11 +3,9 @@ import { IsBoolean, IsNumber, IsString } from 'class-validator';
 export class CreatePostingDto {
 
   @IsString()
-  boardType: string;
+  boardType: "region" | "global";
   @IsString()
   category: string;
-  @IsNumber()
-  userIdx: number;
   @IsString()
   title: string;
   @IsString()

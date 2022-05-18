@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Board } from 'src/boards/entities/board.entity';
 import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
-import { Like } from 'src/likes/entities/likes.entitiy';
+import { Like } from 'src/likes/entities/like.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Connection } from 'typeorm';
 import { CreatePostingDto } from './dto/create-posting.dto';
@@ -73,18 +73,16 @@ export class PostingsService {
         }
     }
 
-    async getPosting(postingIdx: number, userIdx: number){
+    async getPosting(userIdx: number, postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
         try {
             const posting = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
                 .select(['posting.postingIdx', 'posting.title', 'posting.content','posting.userIdx','posting.createdAt', 'posting.updatedAt'])
                 .addSelect(['user.nickname', 'user.userID'])
-                .addSelect(['usefuls.userIdx'])
-                .addSelect(['joyfuls.userIdx'])
+                .addSelect(['likes.userIdx', 'likes.type'])
                 .leftJoin('posting.user', 'user')
-                .leftJoin('posting.usefuls', 'usefuls')
-                .leftJoin('posting.joyfuls', 'joyfuls')
+                .leftJoin('posting.likes', 'likes')
                 .where('posting.postingIdx = :postingIdx', {postingIdx})
                 .getOne();
 
@@ -97,8 +95,8 @@ export class PostingsService {
         }
     }
 
-    async create(createPostingDto: CreatePostingDto){
-        const {boardType, category, userIdx, title, content, isAnonymous} = createPostingDto;
+    async create(createPostingDto: CreatePostingDto, userIdx: number){
+        const {boardType, category, title, content, isAnonymous} = createPostingDto;
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -168,12 +166,7 @@ export class PostingsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const posting = await queryRunner.manager.findOne(Posting, {
-                where: {
-                    postingIdx,
-                }
-            });
-            await queryRunner.manager.delete(Posting, posting);
+            await queryRunner.manager.delete(Posting, postingIdx);
             await queryRunner.commitTransaction();
             return new BaseSuccessResDto();
         } catch(e) {

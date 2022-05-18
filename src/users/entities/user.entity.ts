@@ -1,7 +1,7 @@
 import { Exclude } from "class-transformer";
 import { IsString } from "class-validator";
 import { Comment, Reply } from "src/comments/entities/comment.entity";
-import { Like } from "src/likes/entities/likes.entitiy";
+import { Like } from "src/likes/entities/like.entity";
 import { Posting } from "src/postings/entities/posting.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 

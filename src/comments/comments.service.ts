@@ -3,6 +3,7 @@ import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
 import { Posting } from 'src/postings/entities/posting.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Connection } from 'typeorm';
+import { CommentResDto } from './dto/comment-res.dto';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { Comment, Reply } from './entities/comment.entity';
 
@@ -11,6 +12,30 @@ export class CommentsService {
     constructor(
         private connection: Connection,
     ){}
+
+    async getComments(postingIdx: number){
+        const queryRunner = this.connection.createQueryRunner();
+        try {
+            const comments = await queryRunner.manager
+                .createQueryBuilder(Comment, 'comment')
+                .select(['comment.commentIdx', 'comment.postingIdx','comment.content'])
+                .addSelect(['user.nickname', 'user.userIdx'])
+                .addSelect(['replies.replyIdx', 'replies.commentIdx', 'replies.content'])
+                .addSelect(['repliesUser.nickname', 'repliesUser.userIdx'])
+                .leftJoin('comment.user', 'user')
+                .leftJoin('comment.replies', 'replies')
+                .leftJoin('replies.user', 'repliesUser')
+                .where('comment.postingIdx = :postingIdx', {postingIdx})
+                .getMany();
+
+            console.log(comments)
+            return new CommentResDto(comments);
+        } catch(e) {
+            console.log(e)
+        } finally {
+            await queryRunner.release();
+        }
+    }
 
     async createComment(userIdx: number, createCommentDto: CreateCommentDto){
         const { postingIdx, commentIdx, content, isAnonymous } = createCommentDto;
@@ -50,9 +75,9 @@ export class CommentsService {
                     }
                 })
                 reply.comment = comment;
-                comment.content = content;
-                comment.isAnonymous = isAnonymous;
-                comment.user = user;
+                reply.content = content;
+                reply.isAnonymous = isAnonymous;
+                reply.user = user;
                 await queryRunner.manager.save(reply);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
@@ -65,35 +90,33 @@ export class CommentsService {
         }
     }
 
-    async deleteComment(userIdx: number, parentIdx: number, type: String){
+    async deleteComment(userIdx: number, commentIdx: number, type: String){
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const user = await queryRunner.manager.findOne(User, {
-                where: {
-                    userIdx,
-                }
-            })
-            if(!user){
-                return new BaseFailResDto("해당 유저의 댓글이 아닙니다.");
-            }
-            if(type === "posting"){
+            if(type === "comment"){
                 const comment = await queryRunner.manager.findOne(Comment, {
                     where: {
-                        postingIdx: parentIdx,
+                        commentIdx: commentIdx,
                     }
                 });
-                await queryRunner.manager.delete(Comment, comment);
+                if(comment.userIdx !== userIdx){
+                    return new BaseFailResDto("해당 유저의 댓글이 아닙니다.");
+                }
+                await queryRunner.manager.delete(Comment, commentIdx);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
-            } else if(type === "comment"){
+            } else if(type === "reply"){
                 const reply = await queryRunner.manager.findOne(Reply, {
                     where: {
-                        commentIdx: parentIdx,
+                        replyIdx: commentIdx,
                     }
                 });
-                await queryRunner.manager.delete(Reply, reply);
+                if(reply.userIdx !== userIdx){
+                    return new BaseFailResDto("해당 유저의 대댓글이 아닙니다.");
+                }
+                await queryRunner.manager.delete(Reply, {replyIdx: commentIdx});
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             }

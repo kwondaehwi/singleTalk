@@ -41,11 +41,12 @@ export class PostingsController {
     }
 
     @Post()
-    async create(@Body() createPostingDto: CreatePostingDto, @Res() res){
-        res.send(await this.postingsService.create(createPostingDto));
+    async create(@Req() req: Request, @Body() createPostingDto: CreatePostingDto, @Res() res){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.postingsService.create(createPostingDto, userIdx));
     }
 
-    @Post(':postingIdx')
+    @Post('like/:postingIdx')
     async like(@Req() req: Request, @Param('postingIdx') postingIdx: number, @Query('type') type: string, @Res() res){
         const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
         res.send(await this.postingsService.like(userIdx, postingIdx, type));

@@ -2,7 +2,7 @@ import { IsBoolean, IsNumber, IsString } from "class-validator";
 import { Board } from "src/boards/entities/board.entity";
 import { Comment } from "src/comments/entities/comment.entity";
 import { Common } from "src/commons/entity/common.entity";
-import { Like } from "src/likes/entities/likes.entitiy";
+import { Like } from "src/likes/entities/like.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -44,7 +44,7 @@ export class Posting extends Common {
         cascade: true,
     })
     likes: Like[];
-    @OneToMany(()=>Like, like=>like.posting, {
+    @OneToMany(()=>Comment, comment=>comment.posting, {
         cascade: true,
     })
     comments: Comment[];
