@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
+import { Like } from 'src/likes/entities/like.entity';
 import { Posting } from 'src/postings/entities/posting.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Connection } from 'typeorm';
@@ -22,9 +23,11 @@ export class CommentsService {
                 .addSelect(['user.nickname', 'user.userIdx'])
                 .addSelect(['replies.replyIdx', 'replies.commentIdx', 'replies.content'])
                 .addSelect(['repliesUser.nickname', 'repliesUser.userIdx'])
+                .addSelect(['likes.likeIdx', 'likes.userIdx', 'likes.type', 'likes.category'])
                 .leftJoin('comment.user', 'user')
                 .leftJoin('comment.replies', 'replies')
                 .leftJoin('replies.user', 'repliesUser')
+                .leftJoinAndMapMany('comment.likes', Like, 'likes', 'comment.commentIdx = likes.parentIdx')
                 .where('comment.postingIdx = :postingIdx', {postingIdx})
                 .getMany();
 
@@ -104,7 +107,8 @@ export class CommentsService {
                 if(comment.userIdx !== userIdx){
                     return new BaseFailResDto("해당 유저의 댓글이 아닙니다.");
                 }
-                await queryRunner.manager.delete(Comment, commentIdx);
+                comment.isDeleted = true;
+                await queryRunner.manager.save(comment);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             } else if(type === "reply"){
@@ -116,7 +120,8 @@ export class CommentsService {
                 if(reply.userIdx !== userIdx){
                     return new BaseFailResDto("해당 유저의 대댓글이 아닙니다.");
                 }
-                await queryRunner.manager.delete(Reply, {replyIdx: commentIdx});
+                reply.isDeleted = true;
+                await queryRunner.manager.save(reply);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             }

@@ -1,4 +1,4 @@
-import { IsNumber } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { Posting } from "src/postings/entities/posting.entity";
 import { User } from "src/users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
@@ -12,10 +12,13 @@ export class Like {
     userIdx: number;
     @Column()
     @IsNumber()
-    postingIdx: number;
+    parentIdx: number;
     @Column()
-    @IsNumber()
+    @IsString()
     type: string;
+    @Column()
+    @IsString()
+    category: string;
 
     @ManyToOne(()=>User, user=>user.likes)
     @JoinColumn({
@@ -23,12 +26,4 @@ export class Like {
         referencedColumnName: 'userIdx',
     })
     user: User;
-    @ManyToOne(()=>Posting, posting=>posting.likes, {
-        onDelete: 'CASCADE',
-    })
-    @JoinColumn({
-        name: 'postingIdx',
-        referencedColumnName: 'postingIdx',
-    })
-    posting: Posting;
 }

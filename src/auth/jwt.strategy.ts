@@ -22,8 +22,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(req, payload: Payload) {
     const token = req.cookies.Authentication;
-    console.log(token);
-    console.log(payload);
     return await this.usersService.getUserIfTokenMatches(token, payload.userIdx);
 
   }

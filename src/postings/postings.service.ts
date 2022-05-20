@@ -177,9 +177,12 @@ export class PostingsService {
         }
     }
 
-    async like(userIdx: number, postingIdx: number, type: string){
+    async like(userIdx: number, parentIdx: number, category: string, type: string){
         if(type !== "joyful" && type !== "useful" && type !== "scrap"){
             return new BaseFailResDto('타입이 올바르지 않습니다. (joyful or useful or scrap)');
+        }
+        if(category !== "reply" && category !== "comment" && category !== "posting"){
+            return new BaseFailResDto('카테고리가 올바르지 않습니다. (joyful or useful or scrap)');
         }
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -188,8 +191,9 @@ export class PostingsService {
             const like = await queryRunner.manager.findOne(Like, {
                 where: {
                     userIdx,
-                    postingIdx,
-                    type
+                    parentIdx,
+                    type,
+                    category
                 }
             });
             if (like){
@@ -198,18 +202,14 @@ export class PostingsService {
                 return new BaseSuccessResDto();
             } else {
                 const like = new Like();
-                const posting = await queryRunner.manager.findOne(Posting, {
-                    where: {
-                        postingIdx,
-                    }
-                });
                 const user = await queryRunner.manager.findOne(User, {
                     where:{
                         userIdx,
                     }
                 });
                 like.user = user;
-                like.posting = posting;
+                like.parentIdx = parentIdx;
+                like.category = category;
                 like.type = type;
                 await queryRunner.manager.save(like);
                 await queryRunner.commitTransaction();

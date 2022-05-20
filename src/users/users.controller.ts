@@ -11,6 +11,22 @@ export class UsersController {
         private readonly usersService: UsersService,
     ){}
 
+    @Get('auth/check')
+    async userCheck(@Req() req: Request, @Res() res){
+        if(!req.cookies.Authentication){
+            return res.send({result: false});
+        }
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.usersService.userCheck(userIdx, req.cookies.Authentication));
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('myPage')
+    async geyMyInfo(@Req() req: Request, @Res() res){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.usersService.getMyInfo(userIdx));
+    }
+
     @Post()
     async create(@Body() createUserDto: CreateUserDto, @Res() res){
         res.send(await this.usersService.create(createUserDto));

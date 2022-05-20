@@ -72,6 +72,19 @@ export class UsersService {
         }
     }
 
+    async getMyInfo(userIdx: number){
+        
+    }
+
+    async userCheck(userIdx: number, token: string){
+        const user = await this.getUserIfTokenMatches(token, userIdx);
+        if(user){
+            return {result: true};
+        } else {
+            return {result: false};
+        }
+    }
+
     async getUserIfTokenMatches(token : string, userIdx : number){
         const queryRunner = this.connection.createQueryRunner();
 

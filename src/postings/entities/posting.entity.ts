@@ -40,10 +40,6 @@ export class Posting extends Common {
         referencedColumnName: 'boardIdx',
     })
     board: Board;
-    @OneToMany(()=>Like, like=>like.posting, {
-        cascade: true,
-    })
-    likes: Like[];
     @OneToMany(()=>Comment, comment=>comment.posting, {
         cascade: true,
     })

@@ -31,7 +31,7 @@ import { LikesModule } from './likes/likes.module';
         database: config.get('DATABASE_DATABASE'),
         entities: ["dist/**/*.entity{.ts,.js}"],
         // synchronize: Boolean(config.get('DATABASE_SYNCHRONIZE')),
-        synchronize: false,
+        synchronize: true,
         logging: true,
       }),
     }),

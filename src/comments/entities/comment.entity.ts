@@ -20,6 +20,9 @@ export class Comment extends Common {
     @Column()
     @IsBoolean()
     isAnonymous: boolean;
+    @Column()
+    @IsBoolean()
+    isDeleted: boolean;
 
     @ManyToOne(()=>User, user=>user.comments)
     @JoinColumn({
@@ -57,6 +60,9 @@ export class Reply extends Common {
     @Column()
     @IsBoolean()
     isAnonymous: boolean;
+    @Column()
+    @IsBoolean()
+    isDeleted: boolean;
 
     @ManyToOne(()=>User, user=>user.replies)
     @JoinColumn({
