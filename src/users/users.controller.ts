@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateMyProfileDto, UpdateMyRegionDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UsersService } from './users.service';
 
@@ -56,6 +57,25 @@ export class UsersController {
         res.send({
             msg: 'logout',
         });
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('my-page/region')
+    async geyMyRegion(@Req() req: Request, @Res() res){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.usersService.getMyRegion(userIdx));
+    }
+
+    @Put('my-page')
+    async updateMyProfile(@Req() req: Request, @Body() updateMyProfileDto: UpdateMyProfileDto, @Res() res: Response){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.usersService.updateMyProfile(userIdx, updateMyProfileDto));
+    }
+
+    @Put('my-page/region')
+    async updateMyRegion(@Req() req: Request, @Body() updateMyRegionDto: UpdateMyRegionDto, @Res() res: Response){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.usersService.updateMyRegion(userIdx, updateMyRegionDto));
     }
 
     @UseGuards(JwtAuthGuard)

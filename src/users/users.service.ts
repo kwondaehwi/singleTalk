@@ -1,8 +1,9 @@
 import { ConsoleLogger, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { BaseFailMsgResDto } from 'src/commons/response.dto';
+import { BaseFailMsgResDto, BaseSuccessResDto } from 'src/commons/response.dto';
 import { Connection } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateMyProfileDto, UpdateMyRegionDto } from './dto/update-user.dto';
 import { UserLoginDto } from './dto/user-login.dto';
 import { UserResDto } from './dto/user-response.dto';
 import { User } from './entities/user.entity';
@@ -77,7 +78,6 @@ export class UsersService {
 
     async getMyInfo(userIdx: number){
         const queryRunner = this.connection.createQueryRunner();
-
         try{
             const user = await queryRunner.manager.findOne(User, {
                 where: {
@@ -91,6 +91,70 @@ export class UsersService {
         } catch(error) {
             console.log(error);
         } finally{
+            await queryRunner.release();
+        }
+    }
+
+    async getMyRegion(userIdx: number){
+        const queryRunner = this.connection.createQueryRunner();
+        try{
+            const user = await queryRunner.manager.findOne(User, {
+                where: {
+                    userIdx,
+                }
+            });
+            const response = {};
+            response['region'] =user.region;
+            return new UserResDto(response);
+        } catch(error) {
+            console.log(error);
+        } finally{
+            await queryRunner.release();
+        }
+    }
+
+    async updateMyProfile(userIdx: number, updateMyProfileDto: UpdateMyProfileDto){
+        const {userNickname, introduce, location} = updateMyProfileDto;
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try{
+            const user = await queryRunner.manager.findOne(User, {
+                where:{
+                    userIdx,
+                }
+            });
+            user.nickname = userNickname;
+            user.introduce = introduce;
+            user.region = location;
+            await queryRunner.manager.save(user);
+            await queryRunner.commitTransaction();
+            return new BaseSuccessResDto();
+        }catch(e){
+            await queryRunner.rollbackTransaction();
+        }finally{
+            await queryRunner.release();
+        }
+    }
+
+    async updateMyRegion(userIdx: number, updateMyRegionDto: UpdateMyRegionDto){
+        const {region} = updateMyRegionDto;
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try{
+            const user = await queryRunner.manager.findOne(User, {
+                where:{
+                    userIdx,
+                }
+            });
+            user.region = region;
+            await queryRunner.manager.save(user);
+            await queryRunner.commitTransaction();
+            return new BaseSuccessResDto();
+        }catch(e){
+            await queryRunner.rollbackTransaction();
+        }finally{
             await queryRunner.release();
         }
     }
