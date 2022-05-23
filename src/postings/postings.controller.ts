@@ -14,19 +14,22 @@ export class PostingsController {
 
     @Get()
     async getPostings(
+        @Req() req: Request,
         @Query('category') category: string,
         @Query('sort') sort: string,
         @Query('type') type: string, 
         @Res() res) {
-        res.send(await this.postingsService.getPostings(category, sort, type));
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        res.send(await this.postingsService.getPostings(userIdx, category, sort, type));
     }
 
-    @Get('mypage/:userIdx')
+    @Get('mypage/')
     async getMyPostings(
-        @Param('userIdx') userIdx: number, 
+        @Req() req: Request,
         @Query('type') type: string,
         @Res() res
     ){
+        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
         res.send(await this.postingsService.getMyPostings(userIdx, type));
     }
 

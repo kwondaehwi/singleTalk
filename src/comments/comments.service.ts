@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
+import { BaseFailMsgResDto, BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
 import { Like } from 'src/likes/entities/like.entity';
 import { Posting } from 'src/postings/entities/posting.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -105,7 +105,7 @@ export class CommentsService {
                     }
                 });
                 if(comment.userIdx !== userIdx){
-                    return new BaseFailResDto("해당 유저의 댓글이 아닙니다.");
+                    return new BaseFailMsgResDto("해당 유저의 댓글이 아닙니다.");
                 }
                 comment.isDeleted = true;
                 await queryRunner.manager.save(comment);
@@ -118,14 +118,14 @@ export class CommentsService {
                     }
                 });
                 if(reply.userIdx !== userIdx){
-                    return new BaseFailResDto("해당 유저의 대댓글이 아닙니다.");
+                    return new BaseFailMsgResDto("해당 유저의 대댓글이 아닙니다.");
                 }
                 reply.isDeleted = true;
                 await queryRunner.manager.save(reply);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
             }
-            return new BaseFailResDto("타입이 맞지 않습니다.");
+            return new BaseFailMsgResDto("타입이 맞지 않습니다.");
         } catch(e) {
             console.log(e);
             await queryRunner.rollbackTransaction();

@@ -1,5 +1,5 @@
 import { Exclude } from "class-transformer";
-import { IsString } from "class-validator";
+import { IsOptional, IsString } from "class-validator";
 import { Comment, Reply } from "src/comments/entities/comment.entity";
 import { Like } from "src/likes/entities/like.entity";
 import { Posting } from "src/postings/entities/posting.entity";
@@ -22,17 +22,18 @@ export class User {
     @Column({ nullable: true })
     @Exclude()
     currentToken?: string;
-    // @Column()
-    // @IsString()
-    // region: string;
+    @Column()
+    @IsString()
+    region: string;
     // @Column()
     // @IsEmail()
     // email: string;
     // @Column({
     //     nullable: true,
     // })
-    // @IsString()
-    // description: string
+    @IsOptional()
+    @IsString()
+    introduce: string
 
     @OneToMany(()=>Posting, posting=>posting.user)
     postings: Posting[];

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Board } from 'src/boards/entities/board.entity';
-import { BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
+import { BaseFailMsgResDto, BaseFailResDto, BaseSuccessResDto } from 'src/commons/response.dto';
 import { Like } from 'src/likes/entities/like.entity';
 import { User } from 'src/users/entities/user.entity';
 import { Connection } from 'typeorm';
@@ -15,7 +15,7 @@ export class PostingsService {
         private connection: Connection
     ){}
 
-    async getPostings(category: string, sort: string, type: string){
+    async getPostings(userIdx:number, category: string, sort: string, type: string){
         const queryRunner = this.connection.createQueryRunner();
 
         try {
@@ -23,27 +23,118 @@ export class PostingsService {
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
                 .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
-                .addSelect(['user.nickname'])
-                .leftJoin('posting.user', 'user')
-                .leftJoin('posting.board', 'board')
+                .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
+                .leftJoinAndSelect('posting.comments', 'comments')
+                .leftJoinAndSelect('posting.user', 'user')
+                .leftJoinAndSelect('posting.board', 'board')
+                .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('board.type = :type', {type})
-                .groupBy('posting.postingIdx')
                 .getMany()
 
-                return new PostingResDto(postings);
+                const responses = [];
+                postings.map(posting => {
+                    const response = {};
+                    response['title'] = posting.title;
+                    response['userID'] = posting.user.userID;
+                    response['userIdx'] = posting.user.userIdx;
+                    response['userNickname'] = posting.user.nickname;
+                    response['content'] = posting.content;
+                    response['updatedAt'] = posting.updatedAt;
+                    response['createdAt'] = posting.createdAt;
+                    response['usefulCnt'] = 0;
+                    response['joyfulCnt'] = 0;
+                    response['scrapCnt'] = 0;
+                    response['commentCnt'] = 0;
+                    response['isUseful'] = false;
+                    response['isJoyful'] = false;
+                    response['isScrap'] = false;
+                    
+                    const likeArr = posting['likes'];
+                    const joyfuls = likeArr.filter(like => like.category === "joyful");
+                    joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    
+                    const usefuls = likeArr.filter(like => like.category === "useful");
+                    usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false)
+                    
+                    const scraps = likeArr.filter(like => like.category === "scrap");
+                    scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false)
+                    
+                    response['usefulCnt'] = usefuls.length;
+                    response['joyfulCnt'] = joyfuls.length;
+                    response['scrapCnt'] = scraps.length;
+                    response['commentCnt'] = posting.comments.length;
+                    
+                    responses.push(response);
+                })
+                let result = [];
+                if(sort === "joyful"){
+                    result = responses.sort(function(a, b) { 
+                        return a.joyfulCnt > b.joyfulCnt ? -1 : a.joyfulCnt > b.joyfulCnt ? 1 : 0;
+                    });
+                } else if (sort === "useful") {
+                    result = responses.sort(function(a, b) { 
+                        return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
+                    });
+                }
+                return new PostingResDto(result);
             } else{
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
                 .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
-                .addSelect(['user.nickname'])
-                .addSelect(['COUNT(usefuls.postingIdx) as usefulCount'])
-                .leftJoin('posting.user', 'user')
-                .leftJoin('posting.board', 'board')
-                .leftJoin('posting.usefuls', 'usefuls')
+                .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
+                .leftJoinAndSelect('posting.comments', 'comments')
+                .leftJoinAndSelect('posting.user', 'user')
+                .leftJoinAndSelect('posting.board', 'board')
+                .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('board.type = :type and board.category = :category', {type, category})
                 .getMany()
 
-                return new PostingResDto(postings);
+                const responses = [];
+                postings.map(posting => {
+                    const response = {};
+                    response['title'] = posting.title;
+                    response['userID'] = posting.user.userID;
+                    response['userIdx'] = posting.user.userIdx;
+                    response['userNickname'] = posting.user.nickname;
+                    response['content'] = posting.content;
+                    response['updatedAt'] = posting.updatedAt;
+                    response['createdAt'] = posting.createdAt;
+                    response['usefulCnt'] = 0;
+                    response['joyfulCnt'] = 0;
+                    response['scrapCnt'] = 0;
+                    response['commentCnt'] = 0;
+                    response['isUseful'] = false;
+                    response['isJoyful'] = false;
+                    response['isScrap'] = false;
+                    
+                    const likeArr = posting['likes'];
+                    const joyfuls = likeArr.filter(like => like.category === "joyful");
+                    joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    
+                    const usefuls = likeArr.filter(like => like.category === "useful");
+                    usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false)
+                    
+                    const scraps = likeArr.filter(like => like.category === "scrap");
+                    scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false)
+                    
+                    response['usefulCnt'] = usefuls.length;
+                    response['joyfulCnt'] = joyfuls.length;
+                    response['scrapCnt'] = scraps.length;
+                    response['commentCnt'] = posting.comments.length;
+                    
+                    responses.push(response);
+                })
+                let result = [];
+                if(sort === "joyful"){
+                    result = responses.sort(function(a, b) { 
+                        return a.joyfulCnt > b.joyfulCnt ? -1 : a.joyfulCnt > b.joyfulCnt ? 1 : 0;
+                    });
+                } else if (sort === "useful") {
+                    result = responses.sort(function(a, b) { 
+                        return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
+                    });
+                }
+                return new PostingResDto(result);
             }
         } catch(e) {
             console.log(e);
@@ -57,15 +148,53 @@ export class PostingsService {
         try {
             const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content','posting.createdAt', 'posting.updatedAt'])
-                .addSelect(['user.nickname', 'user.userID'])
-                .leftJoin('posting.user', 'user')
-                .leftJoin('posting.board', 'board')
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
+                .leftJoinAndSelect('posting.comments', 'comments')
+                .leftJoinAndSelect('posting.user', 'user')
+                .leftJoinAndSelect('posting.board', 'board')
+                .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('posting.userIdx = :userIdx and board.type = :type', {userIdx, type})
                 .getMany();
 
-            console.log(postings)
-            return new PostingResDto(postings);
+                const responses = [];
+                postings.map(posting => {
+                    const response = {};
+                    response['title'] = posting.title;
+                    response['userID'] = posting.user.userID;
+                    response['userIdx'] = posting.user.userIdx;
+                    response['userNickname'] = posting.user.nickname;
+                    response['content'] = posting.content;
+                    response['updatedAt'] = posting.updatedAt;
+                    response['createdAt'] = posting.createdAt;
+                    response['usefulCnt'] = 0;
+                    response['joyfulCnt'] = 0;
+                    response['scrapCnt'] = 0;
+                    response['commentCnt'] = 0;
+                    response['isUseful'] = false;
+                    response['isJoyful'] = false;
+                    response['isScrap'] = false;
+                    
+                    const likeArr = posting['likes'];
+                    const joyfuls = likeArr.filter(like => like.category === "joyful");
+                    joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    
+                    const usefuls = likeArr.filter(like => like.category === "useful");
+                    usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false)
+                    
+                    const scraps = likeArr.filter(like => like.category === "scrap");
+                    scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false)
+                    
+                    response['usefulCnt'] = usefuls.length;
+                    response['joyfulCnt'] = joyfuls.length;
+                    response['scrapCnt'] = scraps.length;
+                    response['commentCnt'] = posting.comments.length;
+                    
+                    responses.push(response);
+                })
+
+            console.log(responses)
+            return new PostingResDto(responses);
         } catch(e) {
             console.log(e)
         } finally {
@@ -78,16 +207,51 @@ export class PostingsService {
         try {
             const posting = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content','posting.userIdx','posting.createdAt', 'posting.updatedAt'])
-                .addSelect(['user.nickname', 'user.userID'])
-                .addSelect(['likes.userIdx', 'likes.type'])
-                .leftJoin('posting.user', 'user')
-                .leftJoin('posting.likes', 'likes')
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
+                .leftJoinAndSelect('posting.comments', 'comments')
+                .leftJoinAndSelect('posting.user', 'user')
+                .leftJoinAndSelect('posting.board', 'board')
+                .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('posting.postingIdx = :postingIdx', {postingIdx})
                 .getOne();
 
-            console.log(posting)
-            return new PostingResDto(posting);
+                const response = {};
+                response['postingIdx'] = posting.postingIdx;
+                response['title'] = posting.title;
+                response['userID'] = posting.user.userID;
+                response['userIdx'] = posting.user.userIdx;
+                response['userNickname'] = posting.user.nickname;
+                response['content'] = posting.content;
+                response['updatedAt'] = posting.updatedAt;
+                response['createdAt'] = posting.createdAt;
+                response['usefulCnt'] = 0;
+                response['joyfulCnt'] = 0;
+                response['scrapCnt'] = 0;
+                response['commentCnt'] = 0;
+                response['isUseful'] = false;
+                response['isJoyful'] = false;
+                response['isScrap'] = false;
+                    
+                const likeArr = posting['likes'];
+                const joyfuls = likeArr.filter(like => like.category === "joyful");
+                joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false);
+                    
+                const usefuls = likeArr.filter(like => like.category === "useful");
+                usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false);
+                    
+                const scraps = likeArr.filter(like => like.category === "scrap");
+                scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false);
+
+                posting.userIdx === userIdx ? response['isOwner'] = true : response['isOwner'] = false;
+                    
+                response['usefulCnt'] = usefuls.length;
+                response['joyfulCnt'] = joyfuls.length;
+                response['scrapCnt'] = scraps.length;
+                response['commentCnt'] = posting.comments.length;
+
+            console.log(response)
+            return new PostingResDto(response);
         } catch(e) {
             console.log(e)
         } finally {
@@ -178,11 +342,11 @@ export class PostingsService {
     }
 
     async like(userIdx: number, parentIdx: number, category: string, type: string){
-        if(type !== "joyful" && type !== "useful" && type !== "scrap"){
-            return new BaseFailResDto('타입이 올바르지 않습니다. (joyful or useful or scrap)');
+        if(category !== "joyful" && category !== "useful" && category !== "scrap"){
+            return new BaseFailMsgResDto('타입이 올바르지 않습니다. (joyful or useful or scrap)');
         }
-        if(category !== "reply" && category !== "comment" && category !== "posting"){
-            return new BaseFailResDto('카테고리가 올바르지 않습니다. (joyful or useful or scrap)');
+        if(type !== "reply" && type !== "comment" && type !== "posting"){
+            return new BaseFailMsgResDto('카테고리가 올바르지 않습니다. (joyful or useful or scrap)');
         }
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -218,7 +382,7 @@ export class PostingsService {
         } catch(e) {
             console.log(e);
             await queryRunner.rollbackTransaction();
-            return new BaseFailResDto('false');
+            return new BaseFailMsgResDto('삭제 실패');
         } finally {
             await queryRunner.release();
         }

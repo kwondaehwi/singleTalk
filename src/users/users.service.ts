@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { BaseFailMsgResDto } from 'src/commons/response.dto';
 import { Connection } from 'typeorm';
@@ -15,7 +15,7 @@ export class UsersService {
     ){}
 
     async create(createUserDto: CreateUserDto){
-        const {userID, password, nickname} = createUserDto;
+        const {userID, password, nickname, region} = createUserDto;
         const queryRunner = this.connection.createQueryRunner();
 
         await queryRunner.connect()
@@ -33,6 +33,7 @@ export class UsersService {
                 user.userID = userID;
                 user.password = password;
                 user.nickname = nickname;
+                user.region = region;
                 await queryRunner.manager.save(user);
                 await queryRunner.commitTransaction();
                 return new UserResDto(true);
@@ -56,6 +57,8 @@ export class UsersService {
                     userID,
                 }
             });
+            console.log(password);
+            console.log(user.password);
             if(user.password == password){
                 const payload = { userIdx: user.userIdx };
                 const token =  this.jwtService.sign(payload);
@@ -73,7 +76,23 @@ export class UsersService {
     }
 
     async getMyInfo(userIdx: number){
-        
+        const queryRunner = this.connection.createQueryRunner();
+
+        try{
+            const user = await queryRunner.manager.findOne(User, {
+                where: {
+                    userIdx,
+                }
+            });
+            const response = {};
+            response['userNickname'] =user.nickname;
+            response['introduce'] = user.introduce;
+            return new UserResDto(response);
+        } catch(error) {
+            console.log(error);
+        } finally{
+            await queryRunner.release();
+        }
     }
 
     async userCheck(userIdx: number, token: string){

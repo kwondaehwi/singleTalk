@@ -20,7 +20,9 @@ export class Comment extends Common {
     @Column()
     @IsBoolean()
     isAnonymous: boolean;
-    @Column()
+    @Column({
+        default: false,
+    })
     @IsBoolean()
     isDeleted: boolean;
 
@@ -60,7 +62,9 @@ export class Reply extends Common {
     @Column()
     @IsBoolean()
     isAnonymous: boolean;
-    @Column()
+    @Column({
+        default: false,
+    })
     @IsBoolean()
     isDeleted: boolean;
 

@@ -21,7 +21,7 @@ export class UsersController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Get('myPage')
+    @Get('my-page')
     async geyMyInfo(@Req() req: Request, @Res() res){
         const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
         res.send(await this.usersService.getMyInfo(userIdx));

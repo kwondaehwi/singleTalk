@@ -9,4 +9,7 @@ export class CreateUserDto {
 
   @IsString()
   nickname: string;
+
+  @IsString()
+  region: string;
 }
