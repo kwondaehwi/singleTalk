@@ -17,7 +17,8 @@ export class PostingsService {
 
     async getPostings(userIdx:number, category: string, sort: string, type: string){
         const queryRunner = this.connection.createQueryRunner();
-
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try {
             if (category == "all"){
                 const postings = await queryRunner.manager
@@ -76,6 +77,7 @@ export class PostingsService {
                         return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
                     });
                 }
+                await queryRunner.commitTransaction();
                 return new PostingResDto(result);
             } else{
                 const postings = await queryRunner.manager
@@ -134,6 +136,7 @@ export class PostingsService {
                         return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
                     });
                 }
+                await queryRunner.commitTransaction();
                 return new PostingResDto(result);
             }
         } catch(e) {
@@ -145,6 +148,8 @@ export class PostingsService {
 
     async getMyPostings(userIdx: number, type: string){
         const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try {
             const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
@@ -193,7 +198,8 @@ export class PostingsService {
                     responses.push(response);
                 })
 
-            console.log(responses)
+            console.log(responses);
+            await queryRunner.commitTransaction();
             return new PostingResDto(responses);
         } catch(e) {
             console.log(e)
@@ -204,6 +210,8 @@ export class PostingsService {
 
     async getPosting(userIdx: number, postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try {
             const posting = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
@@ -250,7 +258,8 @@ export class PostingsService {
                 response['scrapCnt'] = scraps.length;
                 response['commentCnt'] = posting.comments.length;
 
-            console.log(response)
+            console.log(response);
+            await queryRunner.commitTransaction();
             return new PostingResDto(response);
         } catch(e) {
             console.log(e)

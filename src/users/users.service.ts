@@ -78,6 +78,8 @@ export class UsersService {
 
     async getMyInfo(userIdx: number){
         const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try{
             const user = await queryRunner.manager.findOne(User, {
                 where: {
@@ -87,6 +89,7 @@ export class UsersService {
             const response = {};
             response['userNickname'] =user.nickname;
             response['introduce'] = user.introduce;
+            await queryRunner.commitTransaction();
             return new UserResDto(response);
         } catch(error) {
             console.log(error);
@@ -97,6 +100,8 @@ export class UsersService {
 
     async getMyRegion(userIdx: number){
         const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try{
             const user = await queryRunner.manager.findOne(User, {
                 where: {
@@ -105,6 +110,7 @@ export class UsersService {
             });
             const response = {};
             response['region'] =user.region;
+            await queryRunner.commitTransaction();
             return new UserResDto(response);
         } catch(error) {
             console.log(error);
@@ -170,13 +176,15 @@ export class UsersService {
 
     async getUserIfTokenMatches(token : string, userIdx : number){
         const queryRunner = this.connection.createQueryRunner();
-
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try{
             const user = await queryRunner.manager.findOne(User, {
                 where: {
                     userIdx: userIdx,
                 }
             });
+            await queryRunner.commitTransaction();
             if (token == user.currentToken) {
                 return user;
             } else {

@@ -16,6 +16,8 @@ export class CommentsService {
 
     async getComments(postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
         try {
             const comments = await queryRunner.manager
                 .createQueryBuilder(Comment, 'comment')
@@ -31,7 +33,8 @@ export class CommentsService {
                 .where('comment.postingIdx = :postingIdx', {postingIdx})
                 .getMany();
 
-            console.log(comments)
+            console.log(comments);
+            await queryRunner.commitTransaction();
             return new CommentResDto(comments);
         } catch(e) {
             console.log(e)
