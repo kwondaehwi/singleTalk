@@ -2,6 +2,7 @@ import { Exclude } from "class-transformer";
 import { IsOptional, IsString } from "class-validator";
 import { Comment, Reply } from "src/comments/entities/comment.entity";
 import { Like } from "src/likes/entities/like.entity";
+import { Matching, UserMatching } from "src/matchings/entities/matching.entity";
 import { Posting } from "src/postings/entities/posting.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
@@ -44,5 +45,9 @@ export class User {
     comments: Comment[];
     @OneToMany(()=>Reply, reply=>reply.user)
     replies: Reply[];
+    @OneToMany(()=>Matching, matching=>matching.user)
+    matchings: Matching[];
+    @OneToMany(()=>UserMatching, userMatching=>userMatching.user)
+    userMatchings: UserMatching[];
 
 }
