@@ -32,8 +32,9 @@ export class User {
     // @Column({
     //     nullable: true,
     // })
-    @Column()
-    @IsOptional()
+    @Column({
+        default: null
+    })
     @IsString()
     introduce: string
 

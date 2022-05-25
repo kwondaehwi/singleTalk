@@ -21,6 +21,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req, payload: Payload) {
+    if(!req){
+      return {msg:"토큰이 없습니다"}
+    }
     const token = req.cookies.Authentication;
     return await this.usersService.getUserIfTokenMatches(token, payload.userIdx);
 

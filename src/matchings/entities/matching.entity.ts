@@ -60,6 +60,14 @@ export class Matching extends Common {
 
 @Entity()
 export class UserMatching {
+    constructor(
+        user: User,
+        matching: Matching,
+    ){
+        this.user = user;
+        this.matching = matching;
+    }
+
     @PrimaryGeneratedColumn()
     userMatchingIdx: number;
     @Column()
@@ -69,7 +77,9 @@ export class UserMatching {
     @IsNumber()
     matchingIdx: number;
 
-    @ManyToOne(()=>Matching, matching=>matching.userMatchings)
+    @ManyToOne(()=>Matching, matching=>matching.userMatchings, {
+        onDelete: 'CASCADE',
+    })
     @JoinColumn({
         name: 'matchingIdx',
         referencedColumnName: 'matchingIdx',

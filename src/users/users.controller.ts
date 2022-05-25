@@ -80,7 +80,7 @@ export class UsersController {
 
     @UseGuards(JwtAuthGuard)
     @Get('test')
-    authTest(){
+    authTest(@Req() req: Request){
         return { success: true }
     }
 }
