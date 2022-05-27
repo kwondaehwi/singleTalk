@@ -35,6 +35,7 @@ export class PostingsService {
                 const responses = [];
                 postings.map(posting => {
                     const response = {};
+                    response['postingIdx'] = posting.postingIdx;
                     response['title'] = posting.title;
                     response['userID'] = posting.user.userID;
                     response['userIdx'] = posting.user.userIdx;
@@ -94,6 +95,7 @@ export class PostingsService {
                 const responses = [];
                 postings.map(posting => {
                     const response = {};
+                    response['postingIdx'] = posting.postingIdx;
                     response['title'] = posting.title;
                     response['userID'] = posting.user.userID;
                     response['userIdx'] = posting.user.userIdx;
@@ -165,6 +167,7 @@ export class PostingsService {
                 const responses = [];
                 postings.map(posting => {
                     const response = {};
+                    response['postingIdx'] = posting.postingIdx;
                     response['title'] = posting.title;
                     response['userID'] = posting.user.userID;
                     response['userIdx'] = posting.user.userIdx;

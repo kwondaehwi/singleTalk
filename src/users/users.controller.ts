@@ -40,9 +40,11 @@ export class UsersController {
             res.cookie('Authentication', access, {
                 httpOnly: true,
                 maxAge: 1800 * 1000,
-                sameSite: "none",
+                sameSite: "Lax",
             })
             res.send({result: true});
+        }else {
+            res.send({result: false});
         }
     }
 
