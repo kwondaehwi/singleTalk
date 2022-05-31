@@ -120,7 +120,7 @@ export class UsersService {
     }
 
     async updateMyProfile(userIdx: number, updateMyProfileDto: UpdateMyProfileDto){
-        const {userNickname, introduce, location} = updateMyProfileDto;
+        const {userNickname, introduce} = updateMyProfileDto;
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
@@ -132,7 +132,6 @@ export class UsersService {
             });
             user.nickname = userNickname;
             user.introduce = introduce;
-            user.region = location;
             await queryRunner.manager.save(user);
             await queryRunner.commitTransaction();
             return new BaseSuccessResDto();

@@ -166,6 +166,7 @@ export class PostingsService {
                 .leftJoinAndSelect('posting.board', 'board')
                 .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('posting.userIdx = :userIdx and board.type = :type', {userIdx, type})
+                .orderBy('posting.createdAt', 'DESC')
                 .getMany();
 
                 const responses = [];
