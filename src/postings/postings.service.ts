@@ -30,6 +30,7 @@ export class PostingsService {
                 .leftJoinAndSelect('posting.board', 'board')
                 .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('board.type = :type', {type})
+                .orderBy('posting.createdAt', 'DESC')
                 .getMany()
 
                 const responses = [];
@@ -77,6 +78,8 @@ export class PostingsService {
                     result = responses.sort(function(a, b) { 
                         return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
                     });
+                } else {
+                    result = responses;
                 }
                 await queryRunner.commitTransaction();
                 return new PostingResDto(result);
@@ -90,6 +93,7 @@ export class PostingsService {
                 .leftJoinAndSelect('posting.board', 'board')
                 .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
                 .where('board.type = :type and board.category = :category', {type, category})
+                .orderBy('posting.createdAt', 'DESC')
                 .getMany()
 
                 const responses = [];
