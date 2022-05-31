@@ -6,9 +6,6 @@ export class UpdateMyProfileDto {
 
   @IsString()
   introduce: string;
-
-  @IsString()
-  location: string;
 }
 
 export class UpdateMyRegionDto {
