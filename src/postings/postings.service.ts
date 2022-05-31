@@ -23,7 +23,7 @@ export class PostingsService {
             if (category == "all"){
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt', 'posting.isAnonymous'])
                 .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
                 .leftJoinAndSelect('posting.comments', 'comments')
                 .leftJoinAndSelect('posting.user', 'user')
@@ -42,6 +42,7 @@ export class PostingsService {
                     response['userIdx'] = posting.user.userIdx;
                     response['userNickname'] = posting.user.nickname;
                     response['content'] = posting.content;
+                    response['isAnonymous'] = posting.isAnonymous;
                     response['updatedAt'] = posting.updatedAt;
                     response['createdAt'] = posting.createdAt;
                     response['usefulCnt'] = 0;
@@ -86,7 +87,7 @@ export class PostingsService {
             } else{
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt', 'posting.isAnonymous'])
                 .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
                 .leftJoinAndSelect('posting.comments', 'comments')
                 .leftJoinAndSelect('posting.user', 'user')
@@ -105,6 +106,7 @@ export class PostingsService {
                     response['userIdx'] = posting.user.userIdx;
                     response['userNickname'] = posting.user.nickname;
                     response['content'] = posting.content;
+                    response['isAnonymous'] = posting.isAnonymous;
                     response['updatedAt'] = posting.updatedAt;
                     response['createdAt'] = posting.createdAt;
                     response['usefulCnt'] = 0;
@@ -159,7 +161,7 @@ export class PostingsService {
         try {
             const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt', 'posting.isAnonymous'])
                 .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
                 .leftJoinAndSelect('posting.comments', 'comments')
                 .leftJoinAndSelect('posting.user', 'user')
@@ -178,6 +180,7 @@ export class PostingsService {
                     response['userIdx'] = posting.user.userIdx;
                     response['userNickname'] = posting.user.nickname;
                     response['content'] = posting.content;
+                    response['isAnonymous'] = posting.isAnonymous;
                     response['updatedAt'] = posting.updatedAt;
                     response['createdAt'] = posting.createdAt;
                     response['usefulCnt'] = 0;
@@ -223,7 +226,7 @@ export class PostingsService {
         try {
             const posting = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
-                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt'])
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt', 'posting.isAnonymous'])
                 .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
                 .leftJoinAndSelect('posting.comments', 'comments')
                 .leftJoinAndSelect('posting.user', 'user')
@@ -239,6 +242,8 @@ export class PostingsService {
                 response['userIdx'] = posting.user.userIdx;
                 response['userNickname'] = posting.user.nickname;
                 response['content'] = posting.content;
+                response['isAnonymous'] = posting.isAnonymous;
+                response['category'] = posting.board.category;
                 response['updatedAt'] = posting.updatedAt;
                 response['createdAt'] = posting.createdAt;
                 response['usefulCnt'] = 0;
