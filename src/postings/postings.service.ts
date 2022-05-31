@@ -143,6 +143,8 @@ export class PostingsService {
                     result = responses.sort(function(a, b) { 
                         return a.usefulCnt > b.usefulCnt ? -1 : a.usefulCnt > b.usefulCnt ? 1 : 0;
                     });
+                } else {
+                    result = responses;
                 }
                 await queryRunner.commitTransaction();
                 return new PostingResDto(result);
