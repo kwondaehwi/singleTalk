@@ -90,7 +90,7 @@ export class MatchingsService {
                 return {result: false, msg: "해당유저의 매칭 게시글이 아닙니다."};
             }
             matching.userMatchings.map(userMatching => {
-                result.push({userID: userMatching.user.userID, userNickName: userMatching.user.nickname})
+                result.push({userID: userMatching.user.userIdx, userNickName: userMatching.user.nickname})
             })
             console.log(result);
             await queryRunner.commitTransaction();

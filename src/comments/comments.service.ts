@@ -14,62 +14,62 @@ export class CommentsService {
         private connection: Connection,
     ){}
 
-    async getComments(postingIdx: number){
+    async getComments(userIdx: number, postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
             const comments = await queryRunner.manager
                 .createQueryBuilder(Comment, 'comment')
-                .select(['comment.commentIdx', 'comment.postingIdx','comment.content'])
-                .addSelect(['user.nickname', 'user.userIdx'])
-                .addSelect(['replies.replyIdx', 'replies.commentIdx', 'replies.content'])
-                .addSelect(['repliesUser.nickname', 'repliesUser.userIdx'])
-                .addSelect(['likes.likeIdx', 'likes.userIdx', 'likes.type', 'likes.category'])
-                .leftJoin('comment.user', 'user')
-                .leftJoin('comment.replies', 'replies')
-                .leftJoin('replies.user', 'repliesUser')
-                .leftJoinAndMapMany('comment.likes', Like, 'likes', 'comment.commentIdx = likes.parentIdx')
+                .select(['comment.commentIdx', 'comment.postingIdx','comment.content', 'comment.isAnonymous', 'comment.isDeleted'])
+                .leftJoinAndSelect('comment.user', 'user')
+                .leftJoinAndSelect('comment.replies', 'replies')
+                .leftJoinAndSelect('replies.user', 'repliesUser')
+                .leftJoinAndMapMany('comment.likes', Like, 'likes', 'comment.commentIdx = likes.parentIdx and likes.type = "comment"')
+                .leftJoinAndMapMany('replies.likes', Like, 'replyLikes', 'replies.replyIdx = likes.parentIdx and likes.type = "reply"')
                 .where('comment.postingIdx = :postingIdx', {postingIdx})
                 .getMany();
 
 
-                // const responses = [];
-                // comments.map(comment => {
-                //     const response = {};
-                //     response['commentIdx'] = comment.commentIdx;
-                //     response['postingIdx'] = comment.postingIdx;
-                //     response['userIdx'] = comment.user.userIdx;
-                //     response['userNickname'] = comment.user.nickname;
-                //     response['content'] = comment.content;
-                //     response['isAnonymous'] = comment.isAnonymous;
-                //     response['joyfulCnt'] = 0;
-                //     response['replyCnt'] = 0;
-                //     response['isJoyful'] = false;
-                //     response['isOwner'] = false;
-                //     response['isDelete'] = false;
+                const responses = [];
+                comments.map(comment => {
+                    const response = {};
+                    response['commentIdx'] = comment.commentIdx;
+                    response['postingIdx'] = comment.postingIdx;
+                    response['userIdx'] = comment.user.userIdx;
+                    response['userNickname'] = comment.user.nickname;
+                    response['content'] = comment.content;
+                    response['isAnonymous'] = comment.isAnonymous;
+                    response['joyfulCnt'] = 0;
+                    response['replyCnt'] = 0;
+                    response['isJoyful'] = false;
+                    response['isOwner'] = false;
+                    response['isDelete'] = comment.isDeleted;
                     
-                //     const likeArr = posting['likes'];
-                //     const joyfuls = likeArr.filter(like => like.category === "joyful");
-                //     joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    const likeArr = comment['likes'];
+                    const replyArr = comment.replies;
+                    const answers = [];
+                    replyArr.map(reply => {
+                        const replyRes = {};
+                        replyRes['replyIdx'] = reply.replyIdx;
+                        replyRes['commentIdx'] = reply.commentIdx;
+                        replyRes['userIdx'] = reply.user.userIdx;
+                        replyRes['userNickname'] = reply.user.nickname;
+                        replyRes['content'] = reply.content;
+                        replyRes['isDeleted'] = reply.isDeleted;
+                        replyRes['isAnonymous'] = reply.isAnonymous;
+                        answers.push(replyRes);
+                    })
+                    response['answers'] = answers;
+                    const joyfuls = likeArr.filter(like => like.category === "joyful");
+                    joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    response['joyfulCnt'] = joyfuls.length;
+                    response['replyCnt'] = comment.replies.length;
                     
-                //     const usefuls = likeArr.filter(like => like.category === "useful");
-                //     usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false)
-                    
-                //     const scraps = likeArr.filter(like => like.category === "scrap");
-                //     scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false)
-                    
-                //     response['usefulCnt'] = usefuls.length;
-                //     response['joyfulCnt'] = joyfuls.length;
-                //     response['scrapCnt'] = scraps.length;
-                //     response['commentCnt'] = posting.comments.length;
-                    
-                //     responses.push(response);
-                // })
-
-            console.log(comments);
+                    responses.push(response);
+                });
             await queryRunner.commitTransaction();
-            return new CommentResDto(comments);
+            return new CommentResDto(responses);
         } catch(e) {
             console.log(e)
         } finally {
