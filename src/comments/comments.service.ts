@@ -164,6 +164,7 @@ export class CommentsService {
                     return new BaseFailMsgResDto("해당 유저의 대댓글이 아닙니다.");
                 }
                 reply.isDeleted = true;
+                console.log(reply);
                 await queryRunner.manager.save(reply);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
