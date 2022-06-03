@@ -23,7 +23,7 @@ export class PostingsController {
         res.send(await this.postingsService.getPostings(userIdx, category, sort, type));
     }
 
-    @Get('mypage/')
+    @Get('mypage')
     async getMyPostings(
         @Req() req: Request,
         @Query('type') type: string,
