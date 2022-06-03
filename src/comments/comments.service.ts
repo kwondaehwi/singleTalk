@@ -28,6 +28,8 @@ export class CommentsService {
                 .leftJoinAndMapMany('comment.likes', Like, 'likes', 'comment.commentIdx = likes.parentIdx and likes.type = "comment"')
                 .leftJoinAndMapMany('replies.likes', Like, 'replyLikes', 'replies.replyIdx = likes.parentIdx and likes.type = "reply"')
                 .where('comment.postingIdx = :postingIdx', {postingIdx})
+                .orderBy('comment.createdAt', 'DESC')
+                .orderBy('replies.createdAt', 'DESC')
                 .getMany();
 
 
