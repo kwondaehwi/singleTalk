@@ -43,7 +43,7 @@ export class CommentsService {
                     response['joyfulCnt'] = 0;
                     response['replyCnt'] = 0;
                     response['isJoyful'] = false;
-                    response['isOwner'] = false;
+                    comment.userIdx === userIdx ? response['isOwner'] = true : response['isOwner'] = false;
                     response['isDelete'] = comment.isDeleted;
                     
                     const likeArr = comment['likes'];
@@ -58,6 +58,7 @@ export class CommentsService {
                         replyRes['content'] = reply.content;
                         replyRes['isDeleted'] = reply.isDeleted;
                         replyRes['isAnonymous'] = reply.isAnonymous;
+                        reply.userIdx === userIdx ? replyRes['isOwner'] = true : replyRes['isOwner'] = false;
                         answers.push(replyRes);
                     })
                     response['answers'] = answers;
