@@ -146,6 +146,20 @@ export class MatchingsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            const userMatchingToBeDeleted = await queryRunner.manager.findOne(UserMatching, {
+                where: {
+                    userIdx,
+                    matchingIdx
+                }
+            });
+            if(userMatchingToBeDeleted !== undefined){
+                await queryRunner.manager.delete(UserMatching, {
+                    userIdx,
+                    matchingIdx,
+                });
+                await queryRunner.commitTransaction();
+                return new BaseSuccessResDto();
+            }
             const user = await queryRunner.manager.findOne(User, {
                 where: {
                     userIdx,
@@ -158,7 +172,7 @@ export class MatchingsService {
                 where: {
                     matchingIdx,
                 }
-            });
+            }); 
             if(matching.userIdx === userIdx){
                 return {result: false, msg: "자신이 생성한 매칭 게시글 입니다."}
             }
