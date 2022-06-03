@@ -14,7 +14,7 @@ export class MatchingsController {
 
     @UseGuards(JwtAuthGuard)
     @Get()
-    async getAllMatchings(@Req()req, @Query('title') title: string, @Query('isDone') isDone: boolean, @Res() res){
+    async getAllMatchings(@Req()req, @Query('title') title: string,  @Query('isDone') isDone: boolean, @Res() res){
         if(!req) res.send({result: "로그인 해주세요."})
         const userIdx = req.user.userIdx;
         res.send(await this.matchingsService.getAllMatchings(userIdx, title, isDone));

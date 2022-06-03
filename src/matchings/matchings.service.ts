@@ -19,12 +19,28 @@ export class MatchingsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
-            const matchings = await queryRunner.manager
+            if(!title){
+                const matchings = await queryRunner.manager
                 .createQueryBuilder(Matching, 'matching')
                 .select()
                 .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
                 .leftJoinAndSelect('matching.user', 'user')
                 .where('matching.Done = :isDone', {isDone})
+                .getMany();
+
+                matchings.map(matching => {
+                    matching['nowPeople'] = matching.userMatchings.length;
+                })
+                console.log(matchings);
+                await queryRunner.commitTransaction();
+                return new MatchingResDto(matchings);    
+            }
+            const matchings = await queryRunner.manager
+                .createQueryBuilder(Matching, 'matching')
+                .select()
+                .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
+                .leftJoinAndSelect('matching.user', 'user')
+                .where('matching.Done = :isDone and matching.title = :title', {isDone, title})
                 .getMany();
 
             matchings.map(matching => {
