@@ -21,7 +21,7 @@ export class CommentsService {
         try {
             const comments = await queryRunner.manager
                 .createQueryBuilder(Comment, 'comment')
-                .select(['comment.commentIdx', 'comment.postingIdx','comment.content', 'comment.isAnonymous', 'comment.isDeleted'])
+                .select(['comment.commentIdx', 'comment.userIdx', 'comment.postingIdx','comment.content', 'comment.isAnonymous', 'comment.isDeleted', 'comment.createdAt', 'comment.updatedAt'])
                 .leftJoinAndSelect('comment.user', 'user')
                 .leftJoinAndSelect('comment.replies', 'replies')
                 .leftJoinAndSelect('replies.user', 'repliesUser')
@@ -42,10 +42,11 @@ export class CommentsService {
                     response['userNickname'] = comment.user.nickname;
                     response['content'] = comment.content;
                     response['isAnonymous'] = comment.isAnonymous;
+                    response['createdAt'] = comment.createdAt;
                     response['joyfulCnt'] = 0;
                     response['replyCnt'] = 0;
                     response['isJoyful'] = false;
-                    comment.userIdx === userIdx ? response['isOwner'] = true : response['isOwner'] = false;
+                    comment.userIdx == userIdx ? response['isOwner'] = true : response['isOwner'] = false;
                     response['isDelete'] = comment.isDeleted;
                     
                     const likeArr = comment['likes'];
@@ -58,6 +59,7 @@ export class CommentsService {
                         replyRes['userIdx'] = reply.user.userIdx;
                         replyRes['userNickname'] = reply.user.nickname;
                         replyRes['content'] = reply.content;
+                        replyRes['createdAt'] = reply.createdAt;
                         replyRes['isDeleted'] = reply.isDeleted;
                         replyRes['isAnonymous'] = reply.isAnonymous;
                         reply.userIdx === userIdx ? replyRes['isOwner'] = true : replyRes['isOwner'] = false;
