@@ -29,7 +29,7 @@ export class CommentsService {
                 .leftJoinAndMapMany('replies.likes', Like, 'replyLikes', 'replies.replyIdx = likes.parentIdx and likes.type = "reply"')
                 .where('comment.postingIdx = :postingIdx', {postingIdx})
                 .orderBy('comment.createdAt', 'DESC')
-                .orderBy('replies.createdAt', 'DESC')
+                .addOrderBy('replies.createdAt', 'DESC')
                 .getMany();
 
 
@@ -47,7 +47,7 @@ export class CommentsService {
                     response['replyCnt'] = 0;
                     response['isJoyful'] = false;
                     comment.userIdx == userIdx ? response['isOwner'] = true : response['isOwner'] = false;
-                    response['isDelete'] = comment.isDeleted;
+                    response['isDeleted'] = comment.isDeleted;
                     
                     const likeArr = comment['likes'];
                     const replyArr = comment.replies;
