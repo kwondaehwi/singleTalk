@@ -150,6 +150,7 @@ export class CommentsService {
                     return new BaseFailMsgResDto("해당 유저의 댓글이 아닙니다.");
                 }
                 comment.isDeleted = true;
+                console.log(comment);
                 await queryRunner.manager.save(comment);
                 await queryRunner.commitTransaction();
                 return new BaseSuccessResDto();
