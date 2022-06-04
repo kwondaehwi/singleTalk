@@ -20,6 +20,8 @@ export class PostingsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            const myUserInfo = await queryRunner.manager.findOne(User, userIdx);
+
             if (category == "all"){
                 const postings = await queryRunner.manager
                 .createQueryBuilder(Posting, 'posting')
@@ -68,7 +70,13 @@ export class PostingsService {
                     response['scrapCnt'] = scraps.length;
                     response['commentCnt'] = posting.comments.length;
                     
-                    responses.push(response);
+                    if (type === "local") {
+                        if(posting.user.region === myUserInfo.region){
+                            responses.push(response);
+                        }
+                    } else {
+                        responses.push(response);
+                    }
                 })
                 let result = [];
                 if(sort === "joyful"){
@@ -132,7 +140,13 @@ export class PostingsService {
                     response['scrapCnt'] = scraps.length;
                     response['commentCnt'] = posting.comments.length;
                     
-                    responses.push(response);
+                    if (type === "local") {
+                        if(posting.user.region === myUserInfo.region){
+                            responses.push(response);
+                        }
+                    } else {
+                        responses.push(response);
+                    }
                 })
                 let result = [];
                 if(sort === "joyful"){

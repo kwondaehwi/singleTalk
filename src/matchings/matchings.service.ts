@@ -19,6 +19,9 @@ export class MatchingsService {
         await queryRunner.connect();
         await queryRunner.startTransaction();
         try {
+            const myUserInfo = await queryRunner.manager.findOne(User, userIdx);
+            const responses = [];
+
             if(!title){
                 const matchings = await queryRunner.manager
                 .createQueryBuilder(Matching, 'matching')
@@ -31,10 +34,13 @@ export class MatchingsService {
 
                 matchings.map(matching => {
                     matching['nowPeople'] = matching.userMatchings.length;
+                    if(matching.user.region === myUserInfo.region){
+                        responses.push(matching);
+                    }
                 })
-                console.log(matchings);
+                console.log(responses);
                 await queryRunner.commitTransaction();
-                return new MatchingResDto(matchings);    
+                return new MatchingResDto(responses);    
             }
             title = '%' + title + '%';
             console.log(title);
@@ -49,10 +55,13 @@ export class MatchingsService {
 
             matchings.map(matching => {
                 matching['nowPeople'] = matching.userMatchings.length;
+                if(matching.user.region === myUserInfo.region){
+                    responses.push(matching);
+                }
             })
-            console.log(matchings);
+            console.log(responses);
             await queryRunner.commitTransaction();
-            return new MatchingResDto(matchings);
+            return new MatchingResDto(responses);
         } catch(e) {
             console.log(e)
         } finally {
