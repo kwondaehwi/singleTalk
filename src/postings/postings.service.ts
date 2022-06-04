@@ -221,6 +221,71 @@ export class PostingsService {
         }
     }
 
+    async getScrapedPostings(userIdx: number, type: string){
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const postings = await queryRunner.manager
+                .createQueryBuilder(Posting, 'posting')
+                .select(['posting.postingIdx', 'posting.title', 'posting.content', 'posting.userIdx','posting.createdAt', 'posting.updatedAt', 'posting.isAnonymous'])
+                .addSelect(['likes.userIdx', 'likes.parentIdx', 'likes.category'])
+                .leftJoinAndSelect('posting.comments', 'comments')
+                .leftJoinAndSelect('posting.user', 'user')
+                .leftJoinAndSelect('posting.board', 'board')
+                .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
+                .where('likes.userIdx = :userIdx and board.type = :type', {userIdx, type})
+                .orderBy('posting.createdAt', 'DESC')
+                .getMany();
+
+                const responses = [];
+                postings.map(posting => {
+                    const response = {};
+                    response['postingIdx'] = posting.postingIdx;
+                    response['title'] = posting.title;
+                    response['userID'] = posting.user.userID;
+                    response['userIdx'] = posting.user.userIdx;
+                    response['userNickname'] = posting.user.nickname;
+                    response['content'] = posting.content;
+                    response['isAnonymous'] = posting.isAnonymous;
+                    response['updatedAt'] = posting.updatedAt;
+                    response['createdAt'] = posting.createdAt;
+                    response['usefulCnt'] = 0;
+                    response['joyfulCnt'] = 0;
+                    response['scrapCnt'] = 0;
+                    response['commentCnt'] = 0;
+                    response['isUseful'] = false;
+                    response['isJoyful'] = false;
+                    response['isScrap'] = false;
+                    
+                    const likeArr = posting['likes'];
+                    const joyfuls = likeArr.filter(like => like.category === "joyful");
+                    joyfuls.map(joyful => joyful.userIdx === userIdx ? response['isJoyful'] = true : response['isJoyful'] = false)
+                    
+                    const usefuls = likeArr.filter(like => like.category === "useful");
+                    usefuls.map(useful => useful.userIdx === userIdx ? response['isUseful'] = true : response['isUseful'] = false)
+                    
+                    const scraps = likeArr.filter(like => like.category === "scrap");
+                    scraps.map(scrap => scrap.userIdx === userIdx ? response['isScrap'] = true : response['isScrap'] = false)
+                    
+                    response['usefulCnt'] = usefuls.length;
+                    response['joyfulCnt'] = joyfuls.length;
+                    response['scrapCnt'] = scraps.length;
+                    response['commentCnt'] = posting.comments.length;
+                    
+                    responses.push(response);
+                })
+
+            console.log(responses);
+            await queryRunner.commitTransaction();
+            return new PostingResDto(responses);
+        } catch(e) {
+            console.log(e)
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
     async getPosting(userIdx: number, postingIdx: number){
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();

@@ -1,5 +1,6 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { UsersService } from 'src/users/users.service';
 import { CreatePostingDto } from './dto/create-posting.dto';
 import { UpdatePostingDto } from './dto/update-posting.dto';
@@ -23,14 +24,28 @@ export class PostingsController {
         res.send(await this.postingsService.getPostings(userIdx, category, sort, type));
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get('mypage')
     async getMyPostings(
-        @Req() req: Request,
+        @Req() req,
         @Query('type') type: string,
         @Res() res
     ){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
         res.send(await this.postingsService.getMyPostings(userIdx, type));
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Get('scrap')
+    async getScrapedPostings(
+        @Req() req,
+        @Query('type') type: string,
+        @Res() res
+    ){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
+        res.send(await this.postingsService.getScrapedPostings(userIdx, type));
     }
 
     @Get(':postingIdx')
