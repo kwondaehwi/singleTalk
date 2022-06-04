@@ -26,6 +26,7 @@ export class MatchingsService {
                 .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
                 .leftJoinAndSelect('matching.user', 'user')
                 .where('matching.Done = :isDone', {isDone})
+                .orderBy('matching.createdAt', 'DESC')
                 .getMany();
 
                 matchings.map(matching => {
@@ -43,6 +44,7 @@ export class MatchingsService {
                 .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
                 .leftJoinAndSelect('matching.user', 'user')
                 .where('matching.Done = :isDone and matching.title like :title', {isDone, title})
+                .orderBy('matching.createdAt', 'DESC')
                 .getMany();
 
             matchings.map(matching => {
@@ -89,6 +91,33 @@ export class MatchingsService {
         }
     }
 
+    async getMyMatchings(userIdx: number){
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const matchings = await queryRunner.manager
+                .createQueryBuilder(Matching, 'matching')
+                .select()
+                .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
+                .leftJoinAndSelect('matching.user', 'user')
+                .where('matching.userIdx = :userIdx', {userIdx})
+                .orderBy('matching.createdAt', 'DESC')
+                .getMany();
+
+            matchings.map(matching => {
+                matching['nowPeople'] = matching.userMatchings.length;
+            })
+            console.log(matchings);
+            await queryRunner.commitTransaction();
+            return new MatchingResDto(matchings);
+        } catch(e) {
+            console.log(e)
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
     async matchingUsersList(userIdx, matchingIdx){
         const queryRunner = this.connection.createQueryRunner();
         await queryRunner.connect();
@@ -101,6 +130,7 @@ export class MatchingsService {
                 .leftJoinAndSelect('matching.user', 'user')
                 .leftJoinAndSelect('userMatchings.user', 'UMuser')
                 .where('matching.matchingIdx = :matchingIdx', {matchingIdx})
+                .orderBy('matching.createdAt', 'DESC')
                 .getOne();
 
             const result = [];

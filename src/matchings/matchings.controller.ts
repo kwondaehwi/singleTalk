@@ -21,6 +21,14 @@ export class MatchingsController {
     }
 
     @UseGuards(JwtAuthGuard)
+    @Get('mypage')
+    async getMyMatchings(@Req()req, @Res() res){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
+        res.send(await this.matchingsService.getMyMatchings(userIdx));
+    }
+
+    @UseGuards(JwtAuthGuard)
     @Get(':matchingIdx')
     async getMatching(@Req()req, @Param('matchingIdx') matchingIdx: number , @Res() res){
         if(!req) res.send({result: "로그인 해주세요."})
