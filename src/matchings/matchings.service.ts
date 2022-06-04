@@ -301,4 +301,31 @@ export class MatchingsService {
             await queryRunner.release();
         }
     }
+
+    async removeUserFromMatching(userIdx, myUserIdx, matchingIdx){
+        const queryRunner = this.connection.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const matching = await queryRunner.manager.findOne(Matching, {
+                where: {
+                    matchingIdx,
+                }
+            })
+            if(matching.userIdx !== myUserIdx){
+                return {result: false, msg: "해당유저의 매칭 게시글이 아닙니다."};
+            }
+            await queryRunner.manager.delete(UserMatching, {
+                matchingIdx,
+                userIdx
+            });
+            await queryRunner.commitTransaction();
+            return new BaseSuccessResDto();
+        } catch(e) {
+            console.log(e);
+            await queryRunner.rollbackTransaction();
+        } finally {
+            await queryRunner.release();
+        }
+    }
 }

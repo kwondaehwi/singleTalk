@@ -83,4 +83,12 @@ export class MatchingsController {
         const userIdx = req.user.userIdx;
         res.send(await this.matchingsService.delete(userIdx, matchingIdx));
     }
+
+    @UseGuards(JwtAuthGuard)
+    @Post(':matchingIdx/:userIdx/out')
+    async removeUserFromMatching(@Req() req, @Param('matchingIdx') matchingIdx: number, @Param('userIdx') userIdx: number, @Res() res){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const myUserIdx = req.user.userIdx;
+        res.send(await this.matchingsService.removeUserFromMatching(userIdx, myUserIdx, matchingIdx));
+    }
 }
