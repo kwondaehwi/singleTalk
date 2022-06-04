@@ -39,7 +39,7 @@ export class UsersController {
         if (access !== undefined){
             res.cookie('Authentication', access, {
                 httpOnly: true,
-                maxAge: 1800 * 1000,
+                maxAge: 604800 * 1000,
                 sameSite: "Lax",
             })
             res.send({result: true});

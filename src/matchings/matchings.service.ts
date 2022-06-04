@@ -35,12 +35,14 @@ export class MatchingsService {
                 await queryRunner.commitTransaction();
                 return new MatchingResDto(matchings);    
             }
+            title = '%' + title + '%';
+            console.log(title);
             const matchings = await queryRunner.manager
                 .createQueryBuilder(Matching, 'matching')
                 .select()
                 .leftJoinAndSelect('matching.userMatchings', 'userMatchings')
                 .leftJoinAndSelect('matching.user', 'user')
-                .where('matching.Done = :isDone and matching.title = :title', {isDone, title})
+                .where('matching.Done = :isDone and matching.title like :title', {isDone, title})
                 .getMany();
 
             matchings.map(matching => {

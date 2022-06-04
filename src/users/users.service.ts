@@ -62,7 +62,9 @@ export class UsersService {
             console.log(user.password);
             if(user.password == password){
                 const payload = { userIdx: user.userIdx };
-                const token =  this.jwtService.sign(payload);
+                const token =  this.jwtService.sign(payload, {
+                    expiresIn: '604800s'
+                });
                 user.currentToken = token;
                 queryRunner.manager.save(user);
                 await queryRunner.commitTransaction();
