@@ -286,7 +286,10 @@ export class MatchingsService {
             if(matching.userIdx !== userIdx){
                 return {result: false, msg: "해당유저의 매칭 게시글이 아닙니다."};
             }
-            await queryRunner.manager.delete(Matching, matchingIdx);
+            await queryRunner.manager.delete(Matching, {
+                matchingIdx,
+                userIdx
+            });
             await queryRunner.commitTransaction();
             return new BaseSuccessResDto();
         } catch(e) {
