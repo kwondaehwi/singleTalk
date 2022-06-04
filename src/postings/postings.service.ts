@@ -234,7 +234,7 @@ export class PostingsService {
                 .leftJoinAndSelect('posting.user', 'user')
                 .leftJoinAndSelect('posting.board', 'board')
                 .leftJoinAndMapMany('posting.likes', Like, 'likes', 'posting.postingIdx = likes.parentIdx and likes.type = "posting"')
-                .where('likes.userIdx = :userIdx and board.type = :type', {userIdx, type})
+                .where('board.type = :type', {type})
                 .orderBy('posting.createdAt', 'DESC')
                 .getMany();
 
@@ -272,8 +272,10 @@ export class PostingsService {
                     response['joyfulCnt'] = joyfuls.length;
                     response['scrapCnt'] = scraps.length;
                     response['commentCnt'] = posting.comments.length;
-                    
-                    responses.push(response);
+
+                    if(response['isScrap'] === true){
+                        responses.push(response);
+                    }
                 })
 
             console.log(responses);
