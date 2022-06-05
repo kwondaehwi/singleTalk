@@ -68,21 +68,19 @@ export class UsersController {
         res.send(await this.usersService.getMyRegion(userIdx));
     }
 
+    @UseGuards(JwtAuthGuard)
     @Put('my-page')
-    async updateMyProfile(@Req() req: Request, @Body() updateMyProfileDto: UpdateMyProfileDto, @Res() res: Response){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+    async updateMyProfile(@Req() req, @Body() updateMyProfileDto: UpdateMyProfileDto, @Res() res: Response){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
         res.send(await this.usersService.updateMyProfile(userIdx, updateMyProfileDto));
     }
 
-    @Put('my-page/region')
-    async updateMyRegion(@Req() req: Request, @Body() updateMyRegionDto: UpdateMyRegionDto, @Res() res: Response){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
-        res.send(await this.usersService.updateMyRegion(userIdx, updateMyRegionDto));
-    }
-
     @UseGuards(JwtAuthGuard)
-    @Get('test')
-    authTest(@Req() req: Request){
-        return { success: true }
+    @Put('my-page/region')
+    async updateMyRegion(@Req() req, @Body() updateMyRegionDto: UpdateMyRegionDto, @Res() res: Response){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
+        res.send(await this.usersService.updateMyRegion(userIdx, updateMyRegionDto));
     }
 }

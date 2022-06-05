@@ -48,25 +48,31 @@ export class PostingsController {
         res.send(await this.postingsService.getScrapedPostings(userIdx, type));
     }
 
+    @UseGuards(JwtAuthGuard)
     @Get(':postingIdx')
     async getPosting(
-        @Req() req: Request,
+        @Req() req,
         @Param('postingIdx') postingIdx: number,
         @Res() res
     ){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
         res.send(await this.postingsService.getPosting(userIdx, postingIdx));
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post()
-    async create(@Req() req: Request, @Body() createPostingDto: CreatePostingDto, @Res() res){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+    async create(@Req() req, @Body() createPostingDto: CreatePostingDto, @Res() res){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
         res.send(await this.postingsService.create(createPostingDto, userIdx));
     }
 
+    @UseGuards(JwtAuthGuard)
     @Post('like/:parentIdx')
-    async like(@Req() req: Request, @Param('parentIdx') parentIdx: number, @Query('category') category: string, @Query('type') type: string, @Res() res){
-        const { userIdx } = this.usersService.decodeToken(req.cookies.Authentication);
+    async like(@Req() req, @Param('parentIdx') parentIdx: number, @Query('category') category: string, @Query('type') type: string, @Res() res){
+        if(!req) res.send({result: "로그인 해주세요."})
+        const userIdx = req.user.userIdx;
         res.send(await this.postingsService.like(userIdx, parentIdx, category, type));
     }
 
