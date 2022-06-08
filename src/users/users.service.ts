@@ -28,17 +28,25 @@ export class UsersService {
                 }
             })
             if(user){
-                return new UserResDto(false);
-            }else{
-                const user = new User();
-                user.userID = userID;
-                user.password = password;
-                user.nickname = nickname;
-                user.region = region;
-                await queryRunner.manager.save(user);
-                await queryRunner.commitTransaction();
-                return new UserResDto(true);
+                return new UserResDto(1);
             }
+            const dupNickUser = await queryRunner.manager.findOne(User, {
+                where: {
+                    nickname: nickname,
+                }
+            })
+            if(dupNickUser){
+                return new UserResDto(2);
+            }
+            const newUser = new User();
+                
+            user.userID = userID;
+            user.password = password;
+            user.nickname = nickname;
+            user.region = region;
+            await queryRunner.manager.save(user);
+            await queryRunner.commitTransaction();
+            return new UserResDto(0);
         } catch(e) {
             console.log(e)
             await queryRunner.rollbackTransaction();
