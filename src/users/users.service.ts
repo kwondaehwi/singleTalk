@@ -32,19 +32,18 @@ export class UsersService {
             }
             const dupNickUser = await queryRunner.manager.findOne(User, {
                 where: {
-                    nickname: nickname,
+                    nickname,
                 }
             })
             if(dupNickUser){
                 return new UserResDto(2);
             }
             const newUser = new User();
-                
-            user.userID = userID;
-            user.password = password;
-            user.nickname = nickname;
-            user.region = region;
-            await queryRunner.manager.save(user);
+            newUser.userID = userID;
+            newUser.password = password;
+            newUser.nickname = nickname;
+            newUser.region = region;
+            await queryRunner.manager.save(newUser);
             await queryRunner.commitTransaction();
             return new UserResDto(0);
         } catch(e) {
@@ -140,6 +139,14 @@ export class UsersService {
                     userIdx,
                 }
             });
+            const dupUserNick = await queryRunner.manager.findOne(User, {
+                where:{
+                    nickname : userNickname,
+                }
+            });
+            if(dupUserNick !== undefined){
+                return {result: false}
+            }
             user.nickname = userNickname;
             user.introduce = introduce;
             await queryRunner.manager.save(user);
